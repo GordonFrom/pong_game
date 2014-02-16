@@ -19,6 +19,7 @@ class Game
         @player.center_y @screen.height
         @enemy.center_y @screen.height
         @background = Background.new @screen.width, @screen.height
+        @ball = Ball.new @screen.width/2, @screen.height/2
     end
     
     def run!
@@ -32,6 +33,7 @@ class Game
     def update
         @player.update
         @enemy.update
+        @ball.update @screen
         
         @queue.each do |ev|
             @player.handle_event ev
@@ -54,6 +56,7 @@ class Game
         @background.draw @screen
         @player.draw @screen
         @enemy.draw @screen
+        @ball.draw @screen
 
         @screen.flip
     end
@@ -121,6 +124,29 @@ class Paddle < GameObject
         end
         if @moving_down and @y + @height < @bottom_limit
             @y += 5
+        end
+    end
+end
+
+class Ball < GameObject
+    def initialize x, y
+        surface = Rubygame::Surface.load "ball.png"
+        @vx = @vy = 5
+        super x, y, surface        
+    end
+
+    def update screen
+        @x += @vx
+        @y += @vy
+
+        #Left or Right
+        if @x <= 10 or @x+@width >= screen.width - 10
+            @vx *= -1
+        end
+
+        #Top or Bottom
+        if @y <= 10 or @y+@height >= screen.height - 10
+            @vy *= -1
         end
     end
 end
