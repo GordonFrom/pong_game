@@ -1,4 +1,9 @@
 Ruby Game Tutorial: Pong Game
 
-Это пример приложения для
+Example application:
 [*manwithcode.com*](http://manwithcode.com/making-games-with-ruby//)
+
++   Add drawings
++   Add paddle event handlers
+
+
