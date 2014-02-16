@@ -1,4 +1,4 @@
-Ruby on Rails Tutorial
+Ruby Game Tutorial: Pong Game
 
 Это пример приложения для
-[*http://railstutorial.ru/*](http://http://railstutorial.ru/)
+[*manwithcode.com*](http://manwithcode.com/making-games-with-ruby//)
