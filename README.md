@@ -5,5 +5,3 @@ Example application:
 
 +   Add drawings
 +   Add paddle event handlers
-
-
