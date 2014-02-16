@@ -10,8 +10,12 @@ class Game
         @clock = Rubygame::Clock.new
         @clock.target_framerate = 60
         
-        @player = Paddle.new 50, 10, Rubygame::K_W, Rubygame::K_S
-        @enemy = Paddle.new @screen.width-50-@player.width, 10, Rubygame::K_UP, Rubygame::K_DOWN
+        limit = @screen.height - 10
+        @player = Paddle.new 50, 10, 
+                  Rubygame::K_W, Rubygame::K_S, 10, limit
+        @enemy = Paddle.new @screen.width-50-@player.width, 10, 
+                Rubygame::K_UP, Rubygame::K_DOWN, 10, limit
+
         @player.center_y @screen.height
         @enemy.center_y @screen.height
         @background = Background.new @screen.width, @screen.height
@@ -36,6 +40,10 @@ class Game
                 when Rubygame::QuitEvent
                     Rubygame.quit
                     exit
+                when Rubygame::KeyDownEvent
+                  if ev.key == Rubygame::K_ESCAPE
+                    @queue.push Rubygame::QuitEvent.new
+                  end                  
             end
         end
     end
@@ -74,13 +82,15 @@ class GameObject
 end
 
 class Paddle < GameObject
-    def initialize x, y, up_key, down_key
+    def initialize x, y, up_key, down_key, top_limit, bottom_limit
         surface = Rubygame::Surface.new [20, 100]
         surface.fill [255, 255, 255]
         @up_key = up_key
         @down_key = down_key
         @moving_up = false
         @moving_down = false
+        @top_limit = top_limit
+        @bottom_limit = bottom_limit
         super x, y, surface
     end
     
@@ -106,10 +116,10 @@ class Paddle < GameObject
     end
     
     def update
-        if @moving_up
+        if @moving_up and @y > @top_limit
             @y -= 5
         end
-        if @moving_down
+        if @moving_down and @y + @height < @bottom_limit
             @y += 5
         end
     end
