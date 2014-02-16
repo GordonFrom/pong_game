@@ -10,8 +10,8 @@ class Game
         @clock = Rubygame::Clock.new
         @clock.target_framerate = 60
         
-        @player = Paddle.new 50, 10
-        @enemy = Paddle.new @screen.width - 50 - @player.width, 10
+        @player = Paddle.new 50, 10, Rubygame::K_W, Rubygame::K_S
+        @enemy = Paddle.new @screen.width-50-@player.width, 10, Rubygame::K_UP, Rubygame::K_DOWN
         @player.center_y @screen.height
         @enemy.center_y @screen.height
         @background = Background.new @screen.width, @screen.height
@@ -26,7 +26,12 @@ class Game
     end
     
     def update
+        @player.update
+        @enemy.update
+        
         @queue.each do |ev|
+            @player.handle_event ev
+            @enemy.handle_event ev
             case ev
                 when Rubygame::QuitEvent
                     Rubygame.quit
@@ -69,14 +74,44 @@ class GameObject
 end
 
 class Paddle < GameObject
-    def initialize x, y
+    def initialize x, y, up_key, down_key
         surface = Rubygame::Surface.new [20, 100]
         surface.fill [255, 255, 255]
+        @up_key = up_key
+        @down_key = down_key
+        @moving_up = false
+        @moving_down = false
         super x, y, surface
     end
     
     def center_y h
         @y = h/2-@height/2
+    end
+    
+    def handle_event event
+        case event
+            when Rubygame::KeyDownEvent
+                if event.key == @up_key
+                    @moving_up = true
+                elsif event.key == @down_key
+                    @moving_down = true
+                end
+            when Rubygame::KeyUpEvent
+                if event.key == @up_key
+                    @moving_up = false
+                elsif event.key == @down_key
+                    @moving_down = false
+                end
+        end
+    end
+    
+    def update
+        if @moving_up
+            @y -= 5
+        end
+        if @moving_down
+            @y += 5
+        end
     end
 end
 
@@ -92,14 +127,11 @@ class Background < GameObject
         # Left
         surface.draw_box_s [0, 0], [10, surface.height], white
         # Bottom
-        surface.draw_box_s [0, surface.height-10], [surface.width,
-surface.height], white
+        surface.draw_box_s [0, surface.height-10], [surface.width, surface.height], white
         # Right
-        surface.draw_box_s [surface.width-10, 0], [surface.width,
-surface.height], white
+        surface.draw_box_s [surface.width-10, 0], [surface.width, surface.height], white
         # Middle Divide
-        surface.draw_box_s [surface.width/2-5, 0],
-[surface.width/2+5, surface.height], white
+        surface.draw_box_s [surface.width/2-5, 0], [surface.width/2+5, surface.height], white
         
         super 0, 0, surface
     end 
