@@ -48,6 +48,12 @@ class Game
                   end                  
             end
         end
+
+        if collision? @ball, @player    
+            @ball.collision @player, @screen    
+        elsif collision? @ball, @enemy    
+            @ball.collision @enemy, @screen    
+        end
     end
     
     def draw
@@ -59,6 +65,15 @@ class Game
         @ball.draw @screen
 
         @screen.flip
+    end
+
+    def collision? obj1, obj2
+    
+        if obj1.y + obj1.height < obj2.y ; return false ; end    
+        if obj1.y > obj2.y + obj2.height ; return false ; end    
+        if obj1.x + obj1.width < obj2.x ; return false ; end    
+        if obj1.x > obj2.x + obj2.width ; return false ; end
+        return true
     end
 end
 
@@ -147,6 +162,25 @@ class Ball < GameObject
         #Top or Bottom
         if @y <= 10 or @y+@height >= screen.height - 10
             @vy *= -1
+        end
+    end
+
+    def collision paddle, screen
+        # Determine which paddle we've hit
+        # Left
+        if paddle.x < screen.width/2
+            # Check if we are behind the paddle
+            # (we use a 5 pixel buffer just in case)
+            unless @x < paddle.x-5
+                @x = paddle.x+paddle.width+1
+                @vx *= -1
+            end
+        # Right
+        else
+            unless @x > paddle.x+5
+                @x = paddle.x-@width-1
+                @vx *= -1
+            end
         end
     end
 end
