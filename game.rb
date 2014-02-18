@@ -23,7 +23,10 @@ class Game
     @player.center_y @screen.height
     @enemy.center_y @screen.height
     @ball = Ball.new @screen.width/2, @screen.height/2
+    @won = false
 
+    @win_text = Text.new
+    @play_again_text = Text.new 0, 0, "Play Again? Press Y or N", 40
     @background = Background.new @screen.width, @screen.height
   end
 
@@ -35,10 +38,28 @@ class Game
     end
   end
 
+  def win player
+    if player == 1
+      @win_text.text = "Player 1 Wins!"
+    elsif player == 2
+      @win_text.text = "Player 2 Wins!"
+    end
+    @won = true
+    @win_text.center_x @screen.width
+    @win_text.center_y @screen.height
+    @play_again_text.center_x @screen.width
+    @play_again_text.y = @win_text.y+60
+  end
+
   def update
     @player.update
     @enemy.update
-    @ball.update @screen, @player, @enemy
+    @ball.update @screen, @player, @enemy unless @won
+    if @player.score == 3
+      win 1
+    elsif @enemy.score == 3
+      win 2
+    end
 
     @queue.each do |ev|
       @player.handle_event ev
@@ -50,6 +71,18 @@ class Game
       when Rubygame::KeyDownEvent
         if ev.key == Rubygame::K_ESCAPE
           @queue.push Rubygame::QuitEvent.new
+        end
+        if ev.key == Rubygame::K_Y and @won
+          # Reset the game
+          @player.center_y @screen.height
+          @enemy.center_y @screen.height
+          @player.score = 0
+          @enemy.score = 0
+          @won = false
+        end
+        if ev.key == Rubygame::K_N and @won
+          Rubygame.quit
+          exit
         end
       end
     end
@@ -64,10 +97,15 @@ class Game
   def draw
     @screen.fill [0,0,0]
 
-    @background.draw @screen
-    @player.draw @screen
-    @enemy.draw @screen
-    @ball.draw @screen
+    unless @won
+      @background.draw @screen
+      @player.draw @screen
+      @enemy.draw @screen
+      @ball.draw @screen
+    else
+      @win_text.draw @screen
+      @play_again_text.draw @screen
+    end
 
     @screen.flip
   end
@@ -101,6 +139,14 @@ class GameObject
 
   def handle_event event
   end
+
+  def center_x w
+    @x = w/2-@width/2
+  end
+
+  def center_y h
+    @y = h/2-@height/2
+  end
 end
 
 class Paddle < GameObject
@@ -118,10 +164,6 @@ class Paddle < GameObject
     @score_text = Text.new score_x, score_y, @score.to_s, 100
 
     super x, y, surface
-  end
-
-  def center_y h
-    @y = h/2-@height/2
   end
 
   def handle_event event
